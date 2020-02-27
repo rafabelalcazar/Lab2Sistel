@@ -68,11 +68,13 @@ msg_coded = struct('data',zeros(row,column+3));
 G=[1 1 0 1 0 0 0;0 1 1 0 1 0 0;1 1 1 0 0 1 0;1 0 1 0 0 0 1]; 
 
 l=1;
-while l<= numel(msg)
-    msg_coded = msgDouble(l).data * G;
-    msg_codedMod =  mod(msg_coded,2); 
-    l=l+1;
-end
+%while l<= numel(msg)
+%    msg_coded = msgDouble(l).data * G;
+%    msg_codedMod =  mod(msg_coded,2); 
+%    l=l+1;
+%end
+MSG = [0 0 1 0];
+BlockCode = HammingCode(MSG)
 
 
 %size_msg = size(symbol.data)
