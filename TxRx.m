@@ -1,15 +1,6 @@
 %%Se lee la fuente
 tic
 video = VideoReader('Marmota.mp4');
-%M=input(' enter the value of M for M-QAM modulation : ');
-
-%Check M valid value
-%Ld=log2(M);
-%ds=ceil(Ld);
-%dif=ds-Ld;
-%if(dif~=0)
-%   error('the value of M is only acceptable if log2(M)is an integer');
-%end
 
 height = video.Height;
 width = video.Width;
@@ -37,54 +28,30 @@ while hasFrame(video)
     %imshow(s(i).cdata);
     i=i+1;
 end
-toc
-
 %% Preparo palabras de 4 bits para hacer Hamming(7,4)
+%Numero de mensajes de 4 bits
+amountMsg=numel (sBINVector(1).data)/4;
+
+% Preallocating
+msg = struct('cdata',zeros(amountMsg,4,'uint8'));
+msgDouble = struct('cdata',zeros(amountMsg,4,'double'));
 j=1;
 while j <= numel (sBINVector)
-    amountMsg=numel (sBINVector(j).data)/4;
-
+    %msg.data es la información de sBINVector, separada en palabras de 4 bits: Dimens(460800*4)
     msg(j).data = reshape(sBINVector(j).data, [amountMsg, 4] );
+    
+    % msgDouble.data tiene la misma información que msg.data pero el tipo
+    % de dato es 'double': Dimens(460800*4)
     msgDouble(j).data = double(msg(j).data);
-    size_msg = size(msg(j).data);
+    %size_msg = size(msg(j).data);
+    
+    %En BlockCode se almacenan los mensajes codificados: Dimens(460800*7)
+    BlockCode = HammingCode(msgDouble(j).data); %Se añaden 3 bits de paridad
     j=j+1;
 end
-%%
-%row = size_msg(1);
-%column = size_msg(2);
 
-%Creo una matriz de ceros, para los mensajes codificados,
-%Dimens(filas_de_symbol,7): "Con este video son 460800 filas y 7 Columnas para Hamming(7,4)"
-%msg_coded = struct('data',zeros(row,column+3));
-
-%l=1;
-%while l<= numel(msg)
- %   BlockCode = HammingCode(msgDouble(l).data);
-  %  l=l+1;
-%end
-
-
-%%
-%MSG = [0 0 1 0];
-%BlockCode = HammingCode(MSG)
-
-
-%size_msg = size(symbol.data)
-
-%Codificación de fuente
-%i=1;
-%while i <= numel (sBINVector)
-
-%    amountSimbols=numel (sBINVector(i).data)/Ld;
-    
-    %Generar los Simbolos, se tiene en cuenta el numero de bits por simbolo
-    %(Log2(M))
-%    symbol(i).data = reshape(sBINVector(i).data, [amountSimbols, Ld] );
-%    symbol(i).data;
-%    i=i+1;
-%end
-
-%Codificación Canal
+toc
+%% 
 
 
 

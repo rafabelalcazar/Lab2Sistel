@@ -16,7 +16,7 @@ width = video.Width;
 
 %% Preallocating: Se estructura la información del video
 s = struct('cdata',zeros(width,height,3,'uint8'));
-sRGB = struct('data')
+sRGB = struct('data',zeros(width*height*3,1,'uint8'));
 sBIN = struct('data',zeros(width*height*3*8,1,'uint8')); 
 sBINVector = struct('data',zeros(width*height*3,8,'uint8'));
 
@@ -37,25 +37,28 @@ while hasFrame(video)
     %imshow(s(i).cdata);
     i=i+1;
 end
-toc
+%% Preparo palabras de 4 bits para hacer Hamming(7,4)
+%Numero de mensajes de 4 bits
+amountMsg=numel (sBINVector(1).data)/4;
 
-%n=1;
-
-%Preparo palabras de 4 bits para hacer Hamming(7,4)
-%j=1;
-%while j <= numel (sBINVector)
-
-   % amountMsg=numel (sBINVector(j).data)/4;
+% Preallocating
+msg = struct('cdata',zeros(amountMsg,4,'uint8'));
+msgDouble = struct('cdata',zeros(amountMsg,4,'double'));
+j=1;
+while j <= numel (sBINVector)
+    %.data es la version vectorizada de sBIN.data: Dimens(1843200*1)
+    msg(j).data = reshape(sBINVector(j).data, [amountMsg, 4] );
+    % Se necesita que el mensaje sea de tipo double para ser multiplicado
+    % por la matriz generadora
+    msgDouble(j).data = double(msg(j).data);
+    %size_msg = size(msg(j).data);
     
-    %Generar los Simbolos, se tiene en cuenta el numero de bits por simbolo
-    %(Log2(M))
-   % msg(j).data = reshape(sBINVector(j).data, [amountMsg, 4] );
-   % msg(j).data;
-    %imgs(i).a=double(imgs(i).a); 
-   % msgDouble(j).data = double(msg(j).data);
-  %  size_msg = size(msg(j).data);
- %   j=j+1;
-%end
+    %Se crea una estructura donde se almacenan las palabras codigo: Dim 
+    BlockCode = HammingCode(msgDouble(j).data);
+    j=j+1;
+end
+
+toc
 %%
 %row = size_msg(1);
 %column = size_msg(2);
