@@ -6,7 +6,7 @@ height = video.Height;
 width = video.Width;
 
 %% Preallocating: Se estructura la información del video
-s = struct('cdata',zeros(width,height,3,'uint8'));
+s = struct('data',zeros(width,height,3,'uint8'));
 sRGB = struct('data',zeros(width*height*3,1,'uint8'));
 sBIN = struct('data',zeros(width*height*3*8,1,'uint8')); 
 sBINVector = struct('data',zeros(width*height*3,8,'uint8'));
@@ -14,10 +14,10 @@ sBINVector = struct('data',zeros(width*height*3,8,'uint8'));
 i=1;
 while hasFrame(video)
     %La información de cada Fotograma se encuentra en s.data: Dimens(240*320*3 = 230400)
-    s(i).cdata = readFrame(video);
+    s(i).data = readFrame(video);
     
     %en SRGB.data se tiene la información vectorizada de cada fotograma: Dimens(230400*1)
-    sRGB(i).data=reshape(s(i).cdata,[numel(s(i).cdata), 1]);
+    sRGB(i).data=reshape(s(i).data,[numel(s(i).data), 1]);
     
     %sBIN.data es la versión binaria de sRGB.data: Dimens(230400*8 = 1843200)
     sBIN(i).data= de2bi (sRGB(i).data);
@@ -33,8 +33,9 @@ end
 amountMsg=numel (sBINVector(1).data)/4;
 
 % Preallocating
-msg = struct('cdata',zeros(amountMsg,4,'uint8'));
-msgDouble = struct('cdata',zeros(amountMsg,4,'double'));
+msg = struct('data',zeros(amountMsg,4,'uint8'));
+msgDouble = struct('data',zeros(amountMsg,4,'double'));
+BlockCode = struct('data',zeros(amountMsg,4+3,'double'));
 j=1;
 while j <= numel (sBINVector)
     %msg.data es la información de sBINVector, separada en palabras de 4 bits: Dimens(460800*4)
