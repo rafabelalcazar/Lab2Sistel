@@ -47,12 +47,35 @@ while j <= numel (sBINVector)
     %size_msg = size(msg(j).data);
     
     %En BlockCode se almacenan los mensajes codificados: Dimens(460800*7)
-    BlockCode(j) = HammingCode(msgDouble(j).data); %Se añaden 3 bits de paridad
+    BlockCode(j).data = HammingCode(msgDouble(j).data); %Se añaden 3 bits de paridad
     j=j+1;
 end
 
 toc
-%% 
+%% Decodificar y corregir
+
+%msgDecoded = struct('data',zeros(amountMsg,4,'uint8'));
+H=[1 0 0 1 0 1 1;0 1 0 1 1 1 0;0 0 1 0 1 1 1];
+s1=[1 1 0];                             %Se establecen los sindromes con los cuales se realizara la decodificación del mensaje
+s2=[0 1 1];
+s3=[1 1 1];
+s4=[1 0 1];
+k=1;
+while k <= numel(BlockCode)
+    %Structura de sindromes para detectar errores
+    sindrome(k).data=mod(BlockCode(k).data*H',2);
+    if( sindrome(k).data == s1 )
+        msgDecoded(k).data = rem( BlockCode(k).data+[0 0 0 1 0 0 0],2); 
+    elseif(sindrome(k).data == s2)
+            msgDecoded(k).data = rem( BlockCode(k).data+[0 0 0 0 1 0 0],2);
+    elseif(sindrome(k).data == s3)
+        msgDecoded(k).data = rem( BlockCode(k).data+[0 0 0 0 0 1 0],2);
+    elseif(sindrome(k).data == s4)
+        msgDecoded(k).data = rem( BlockCode(k).data+[0 0 0 0 0 0 1],2);
+    end
+
+    k=k+1;
+end
 
 
 
