@@ -47,7 +47,7 @@ while j <= numel (sBINVector)
     %size_msg = size(msg(j).data);
     
     %En BlockCode se almacenan los mensajes codificados: Dimens(460800*7)
-    BlockCode = HammingCode(msgDouble(j).data); %Se añaden 3 bits de paridad
+    BlockCode(j).data = HammingCode(msgDouble(j).data); %Se añaden 3 bits de paridad
     j=j+1;
 end
 
