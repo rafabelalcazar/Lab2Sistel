@@ -1,4 +1,4 @@
-%% Correción de errores
+% Correción de errores
 %To DO: Hacer la logica para detección y correcion de errores
 function decodeMsg = Decode (mCoded)
     %Se define la matriz H

@@ -51,10 +51,11 @@ while j <= numel (sBINVector)
     j=j+1;
 end
 
-toc
+
 %% Decodificar y corregir
 
-%msgDecoded = struct('data',zeros(amountMsg,4,'uint8'));
+msgDecoded = struct('data',zeros(amountMsg,7,'double'));
+sindrome = struct('data',zeros(amountMsg,3,'double'));
 H=[1 0 0 1 0 1 1;0 1 0 1 1 1 0;0 0 1 0 1 1 1];
 s1=[1 1 0];                             %Se establecen los sindromes con los cuales se realizara la decodificación del mensaje
 s2=[0 1 1];
@@ -77,6 +78,7 @@ while k <= numel(BlockCode)
     end
     k=k+1;
 end
+toc
 
 
 
