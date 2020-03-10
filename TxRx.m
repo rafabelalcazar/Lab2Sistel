@@ -5,14 +5,14 @@ video = VideoReader('Marmota[2].mp4');
 height = video.Height;
 width = video.Width;
 
-%% Preallocating: Se estructura la información del video
+%% Preallocating: Se estructura la información del video TX
 s = struct('data',zeros(width,height,3,'uint8'));
 sRGB = struct('data',zeros(width*height*3,1,'uint8'));
 sBIN = struct('data',zeros(width*height*3*8,1,'uint8')); 
 sBINVector = struct('data',zeros(width*height*3,8,'uint8'));
 
 i=1;
-while hasFrame(video)
+while hasFrame(video) && i<=25
     %La información de cada Fotograma se encuentra en s.data: Dimens(240*320*3 = 230400)
     s(i).data = readFrame(video);
     
@@ -28,7 +28,7 @@ while hasFrame(video)
     imshow(s(i).data);
     i=i+1;
 end
-%% Preparo palabras de 4 bits para hacer Hamming(7,4)
+%% Preparo palabras de 4 bits para hacer Hamming(7,4) TX
 %Numero de mensajes de 4 bits
 amountMsg=numel (sBINVector(1).data)/4;
 
@@ -52,29 +52,41 @@ while j <= numel (sBINVector)
 end
 
 
-%% Decodificar y corregir
+%% Decodificar y corregir RX
 
 msgDecoded = struct('data',zeros(amountMsg,4,'double'));
 %fun= arrayfun(@(row) Decode(row.data),BlockCode,'UniformOutput',false);
 %msgDecoded = structfun( @fun  ,BlockCode);
 k=1;
-l=1;
+
 while k <= numel(BlockCode)
     %Structura de sindromes para detectar errores
     %msgDecoded = cell2mat( arrayfun(@(row) Decode(row(1,:)), BlockCode(k).data,'UniformOutput',false));
     %result = arrayfun(@(ROWIDX) mean(M(ROWIDX,:)), (1:size(M,1)).');
-    while l<=size(BlockCode(1).data,1)
+    l=1;
+    while l<=size(BlockCode(k).data,1)
         msgDecoded(k).data(l,:) = Decode(BlockCode(k).data(l,:));
         l=l+1; 
     end
     k=k+1;
 end
 
+%% Reshaping messages RX
+msgReshaped = struct('data',zeros(numel(msgDecoded),8));
+videoRX = struct('data',zeros(height,width,3));
+m=1;
+while m <= numel(msgDecoded)
+    msgReshaped(m).data = reshape(msgDecoded(m).data,[57600,8]);
+    msgBytes(m).data = bi2de(uint8(msgReshaped(m).data));
+    videoRX(m).data = reshape(msgBytes(m).data,[height,width,3]);
+    imshow(videoRX(m).data)
+    m=m+1;
+      
+end
+
 %%
-msgReshaped = reshape(msgDecoded(1).data,[57600,8]);
-msgBytes = bi2de(uint8(msgReshaped));
-videoRX= reshape(msgBytes,[height,width,3]);
-imshow(videoRX)
+%msgBytes = bi2de(uint8(msgReshaped));
+%videoRX= reshape(msgBytes,[height,width,3]);
 
 
 
