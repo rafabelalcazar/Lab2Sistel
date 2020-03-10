@@ -64,14 +64,15 @@ while k <= numel(BlockCode)
     %msgDecoded = cell2mat( arrayfun(@(row) Decode(row(1,:)), BlockCode(k).data,'UniformOutput',false));
     %result = arrayfun(@(ROWIDX) mean(M(ROWIDX,:)), (1:size(M,1)).');
     while l<=size(BlockCode(1).data,1)
-        msgDecoded(k).data(l) = 
-        l=l+1;
-        
+        msgDecoded(k).data(l,:) = Decode(BlockCode(k).data(l,:));
+        l=l+1; 
     end
-    
-    
     k=k+1;
 end
+
+
+
+
 
 
 %% Prueba de codificación y deco

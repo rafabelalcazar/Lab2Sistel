@@ -25,8 +25,8 @@ while hasFrame(video)
     %sBINVector.data es la version vectorizada de sBIN.data: Dimens(1843200*1)
     sBINVector(i).data= reshape(sBIN(i).data,[numel(sBIN (i).data),1]);
     
-    %imshow(s(i).cdata);
-    %i=i+1;
+    imshow(s(i).data);
+    i=i+1;
 end
 %% Preparo palabras de 4 bits para hacer Hamming(7,4)
 %Numero de mensajes de 4 bits
@@ -64,14 +64,23 @@ while k <= numel(BlockCode)
     %msgDecoded = cell2mat( arrayfun(@(row) Decode(row(1,:)), BlockCode(k).data,'UniformOutput',false));
     %result = arrayfun(@(ROWIDX) mean(M(ROWIDX,:)), (1:size(M,1)).');
     while l<=size(BlockCode(1).data,1)
-        msgDecoded(k).data(l,:) = Decode(BlockCode(k).data(l,:))
-        l=l+1;
-        
+        msgDecoded(k).data(l,:) = Decode(BlockCode(k).data(l,:));
+        l=l+1; 
     end
-    
-    
     k=k+1;
 end
+
+%%
+msgReshaped = reshape(msgDecoded(1).data,[57600,8]);
+msgBytes = bi2de(uint8(msgReshaped));
+videoRX= reshape(msgBytes,[height,width,3]);
+imshow(videoRX)
+
+
+
+%msgBytes = 
+
+
 
 
 %% Prueba de codificación y deco
