@@ -1,6 +1,6 @@
 %%Se lee la fuente
 tic
-video = VideoReader('Marmota.mp4');
+video = VideoReader('Marmota[2].mp4');
 
 height = video.Height;
 width = video.Width;
@@ -26,7 +26,7 @@ while hasFrame(video)
     sBINVector(i).data= reshape(sBIN(i).data,[numel(sBIN (i).data),1]);
     
     %imshow(s(i).cdata);
-    i=i+1;
+    %i=i+1;
 end
 %% Preparo palabras de 4 bits para hacer Hamming(7,4)
 %Numero de mensajes de 4 bits
@@ -54,18 +54,32 @@ end
 
 %% Decodificar y corregir
 
-%msgDecoded = struct('data',zeros(amountMsg,7,'double'));
-
-%k=1;
-%while k <= numel(BlockCode)
+msgDecoded = struct('data',zeros(amountMsg,4,'double'));
+%fun= arrayfun(@(row) Decode(row.data),BlockCode,'UniformOutput',false);
+%msgDecoded = structfun( @fun  ,BlockCode);
+k=1;
+l=1;
+while k <= numel(BlockCode)
     %Structura de sindromes para detectar errores
-%    msgDecoded = Decode(BlockCode(k).data)
-%    k=k+1;
-%end
+    %msgDecoded = cell2mat( arrayfun(@(row) Decode(row(1,:)), BlockCode(k).data,'UniformOutput',false));
+    %result = arrayfun(@(ROWIDX) mean(M(ROWIDX,:)), (1:size(M,1)).');
+    while l<=size(BlockCode(1).data,1)
+        msgDecoded(k).data(l,:) = Decode(BlockCode(k).data(l,:))
+        l=l+1;
+        
+    end
+    
+    
+    k=k+1;
+end
 
-test = [1 0 1 0];
-codificado = HammingCode(test)
-decodificado = Decode([0     0     1     1     0     1     1])
+
+%% Prueba de codificación y deco
+
+%test = [1 0 1 0];
+%codificado = HammingCode(test)
+%decodificado = Decode([0     0     1     1     0     1     1])
+
 
 toc
 
