@@ -12,7 +12,7 @@ sBIN = struct('data',zeros(width*height*3*8,1,'uint8'));
 sBINVector = struct('data',zeros(width*height*3,8,'uint8'));
 
 i=1;
-while hasFrame(video) && i<=25
+while hasFrame(video) && i<=3
     %La información de cada Fotograma se encuentra en s.data: Dimens(240*320*3 = 230400)
     s(i).data = readFrame(video);
     
@@ -52,6 +52,43 @@ while j <= numel (sBINVector)
 end
 
 
+%% Modulación 4-QAM
+
+%orden de la modulacion
+M=4;                    
+
+mss_symbolic = struct('data',zeros(amountMsg,4,'double'));
+mss_symbolic_adecimal = struct('data',zeros(amountMsg,4,'double'));
+z00 =  struct('data',zeros(amountMsg,4,'double'));
+
+n=1;
+while n <= numel(BlockCode)
+   
+    mss_symbolic(n).data = reshape(BlockCode(n).data,log2(M),numel(BlockCode(n).data)/log2(M))';
+    mss_symbolic_adecimal(n).data = bi2de(mss_symbolic(n).data);
+   
+    n=n+1;
+end
+
+z=struct('data',zeros(1,numel(mss_symbolic_adecimal(1).data)));
+for a=1: numel(mss_symbolic_adecimal)
+    for b=1: numel(mss_symbolic_adecimal(1).data)
+        if (mss_symbolic_adecimal(a).data(b)==0)
+            z(a).data(b) = complex(-1,1); 
+        elseif (mss_symbolic_adecimal(a).data(b)==2)
+            z(a).data(b) = complex(-1,-1);  
+        elseif (mss_symbolic_adecimal(a).data(b)==1)
+            z(a).data(b) = complex(1,1);
+        elseif (mss_symbolic_adecimal(a).data(b)==3)
+            z(a).data(b) = complex(1,-1);        
+        end
+    end
+end
+%%
+scatterplot(z(1).data(4)),grid on,'*r';
+title('Diagrama de constelación para 4-QAM');
+
+
 %% Decodificar y corregir RX
 
 msgDecoded = struct('data',zeros(amountMsg,4,'double'));
@@ -73,6 +110,7 @@ end
 
 %% Reshaping messages RX
 msgReshaped = struct('data',zeros(numel(msgDecoded),8));
+msgBytes = struct('data',zeros(57600,1));
 videoRX = struct('data',zeros(height,width,3));
 m=1;
 while m <= numel(msgDecoded)
