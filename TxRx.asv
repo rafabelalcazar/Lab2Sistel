@@ -52,14 +52,13 @@ while j <= numel (sBINVector)
 end
 
 
-%% Modulación 4-QAM
+%% Modulación 4-QAM TX
 
 %orden de la modulacion
 M=4;                    
 
 mss_symbolic = struct('data',zeros(amountMsg,4,'double'));
 mss_symbolic_adecimal = struct('data',zeros(amountMsg,4,'double'));
-z00 =  struct('data',zeros(amountMsg,4,'double'));
 
 n=1;
 while n <= numel(BlockCode)
@@ -73,22 +72,71 @@ end
 z=struct('data',zeros(1,numel(mss_symbolic_adecimal(1).data)));
 for a=1: numel(mss_symbolic_adecimal)
     for b=1: numel(mss_symbolic_adecimal(1).data)
-        if (mss_symbolic_adecimal(a).data(b)==0)
-            z(a).data(b) = complex(-1,1); 
-        elseif (mss_symbolic_adecimal(a).data(b)==2)
-            z(a).data(b) = complex(-1,-1);  
-        elseif (mss_symbolic_adecimal(a).data(b)==1)
-            z(a).data(b) = complex(1,1);
-        elseif (mss_symbolic_adecimal(a).data(b)==3)
-            z(a).data(b) = complex(1,-1);        
-        end
+            z(a).data(b) = MyQAM(mss_symbolic_adecimal(a).data(b))';      
     end
 end
+
 %%
+testMod = qammod()
+testDemod = qamdemod(z(1).data,4);
+
+%% Plotting consttelation TX
 scatterplot(z(1).data(4)),grid on,'*r';
 title('Diagrama de constelación para 4-QAM');
 
 
+%% FILTRO CONFORMADOR TX
+R=0.5; %factor de Roll-Off
+U=16;
+L=8; % abarca 8 simbolos con 16 muestras por simbolo
+T=1;
+h1 = rcosfir(R, L, U, T,'sqrt') ; %la longitud del filtro es 2*L*U+1
+
+%%% IMPLEMENTACION DEL FILTRO
+%Aumenta la frecuencia de muestreo de la secuencia por un factor de 16
+su1 = struct('data',zeros(amountMsg,4,'double'));
+su = struct('data',zeros(amountMsg,4,'double'));
+x1 = struct('data',zeros(amountMsg,4,'double'));
+s1 = struct('data',zeros(amountMsg,4,'double'));
+c=1;
+while c <= numel(z)
+   
+    su1(c).data=upsample(z(c).data,U);
+    %se agregan ceros debido al transiente del filtro
+    su(c).data=[su1(c).data zeros(1,2*L*U+1)];
+    %FILTRAJE
+    x1(c).data=filter(h1,1,su(c).data);
+    x1(c).data=filter(h1,1,x1(c).data); %se filtra 2 veces para simular el efecto del transmisor y el receptor
+
+    %se cortan los ceros que se agregaron
+    x1(c).data=x1(c).data(2*L*U+1:end);
+
+    % recuperación de la secuencia original
+    s1(c).data=downsample(x1(c).data, U);
+
+    c=c+1;
+end
+
+%%
+%GRAFICA de la forma de onda resultante
+figure(2)
+plot(x1(1).data), hold on
+axis([ -5 5 -5 5]);
+title('Forma de Onda resultante');
+
+%GRAFICA de las secuencias recuperadas
+%figure(3)
+%subplot(2,1,1);
+%stem(ass,'.', 'linewidth', 2), hold on
+%axis([ 0 40 0 5]);
+%title('Serie de Simbolos para 4-QAM en el transmisor');
+
+%figure(3)
+%subplot(2,1,2);
+plot(s(1).data);
+stem(s1(1).data(1),'.', 'linewidth', 2), hold on
+axis([ 0 40 0 5]);
+title('Filtro - Secuencia recuperada');
 %% Decodificar y corregir RX
 
 msgDecoded = struct('data',zeros(amountMsg,4,'double'));
