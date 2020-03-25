@@ -1,4 +1,4 @@
-function QAM = MyQAM (m)
+function QAM = Mapeo (m)
     if (m==0)
         QAM = complex(-1,1); 
     elseif (m==2)
